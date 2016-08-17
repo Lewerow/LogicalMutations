@@ -4,7 +4,7 @@ module Language where
 
 data BinaryOperatorType = And | Or | Xor deriving (Show, Eq)
 data UnaryOperatorType = Not | Yes deriving (Show, Eq)
-data LogicalType = TRUE | FALSE | Var String deriving (Show, Eq)
+data LogicalType = TRUE | FALSE | Var String deriving (Show, Eq, Ord)
 
 data Expression = BinaryOperator BinaryOperatorType Expression Expression |
   UnaryOperator UnaryOperatorType Expression |

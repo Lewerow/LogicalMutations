@@ -6,13 +6,15 @@ import Test.Tasty.HUnit
 import Data.List
 import Data.Ord
 
-import qualified NormalizationTests as Lang
+import qualified NormalizationTests as Norm
+import qualified MutationTests as Mut
+
 
 main = defaultMain tests
 
 
 tests :: TestTree
-tests = testGroup "Language tests" [Lang.tests]
+tests = testGroup "Language tests" [Norm.tests, Mut.tests]
 -- tests = testGroup "Tests" [properties, unitTests]
 
 properties :: TestTree

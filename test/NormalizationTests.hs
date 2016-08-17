@@ -4,7 +4,6 @@ import Language
 import Normalization
 
 import Test.Tasty
-
 import Test.Tasty.HUnit
 
 tests = testGroup "Grammar normalization"
