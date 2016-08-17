@@ -9,15 +9,15 @@ import Test.Tasty.HUnit
 tests = testGroup "Grammar normalization"
          [
          testCase "Normalization adds unary operators to operands" $
-             (normalize (Operand TRUE)) @?= (UnaryOperator Yes (Operand TRUE)),
+             (normalize (Operand Truth)) @?= (UnaryOperator Yes (Operand Truth)),
          testCase "Normalization does not add unary operator to operands if it already exists" $
-             (normalize (UnaryOperator Not (Operand TRUE))) @?= (UnaryOperator Not (Operand TRUE)),
+             (normalize (UnaryOperator Not (Operand Truth))) @?= (UnaryOperator Not (Operand Truth)),
          testCase "Normalization does not remove additional unary operators to operands if it already exists" $
-             (normalize (UnaryOperator Not (UnaryOperator Yes (Operand FALSE)))) @?=
-                 UnaryOperator Not (UnaryOperator Yes (Operand FALSE)),
+             (normalize (UnaryOperator Not (UnaryOperator Yes (Operand Truth)))) @?=
+                 UnaryOperator Not (UnaryOperator Yes (Operand Truth)),
          testCase "Normalization adds unary operator before binary operator" $
-             (normalize (BinaryOperator Xor (Operand (Var "a")) (Operand TRUE))) @?=
+             (normalize (BinaryOperator Xor (Operand (Var "a")) (Operand Truth))) @?=
                  (UnaryOperator Yes (BinaryOperator Xor
                      (UnaryOperator Yes(Operand (Var "a")))
-                     (UnaryOperator Yes (Operand TRUE))))
+                     (UnaryOperator Yes (Operand Truth))))
          ]
