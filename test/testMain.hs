@@ -6,7 +6,7 @@ import Test.Tasty.HUnit
 import Data.List
 import Data.Ord
 
-import qualified LanguageTests as Lang
+import qualified NormalizationTests as Lang
 
 main = defaultMain tests
 
