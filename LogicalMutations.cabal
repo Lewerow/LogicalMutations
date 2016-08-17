@@ -24,7 +24,10 @@ executable LogicalMutations
 test-suite Tests
   default-language:     Haskell2010
   type:                 exitcode-stdio-1.0
-  hs-source-dirs:       test
+  hs-source-dirs:       test, src
   main-is:              testMain.hs
-  build-depends:        LogicalMutations,
-                        tasty >= 0.11
+  build-depends:        base >= 4.7 && < 5,
+                        tasty >= 0.11,
+                        tasty-quickcheck,
+                        tasty-smallcheck,
+                        tasty-hunit

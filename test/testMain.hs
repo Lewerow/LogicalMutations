@@ -6,10 +6,14 @@ import Test.Tasty.HUnit
 import Data.List
 import Data.Ord
 
+import qualified LanguageTests as Lang
+
 main = defaultMain tests
 
+
 tests :: TestTree
-tests = testGroup "Tests" [properties, unitTests]
+tests = testGroup "Language tests" [Lang.tests]
+-- tests = testGroup "Tests" [properties, unitTests]
 
 properties :: TestTree
 properties = testGroup "Properties" [scProps, qcProps]
