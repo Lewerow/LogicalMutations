@@ -22,7 +22,6 @@ tests = testGroup "Mutation calculations"
                         (UnaryOperator Yes (Operand (Var "a")))
                         (BinaryOperator Xor (UnaryOperator Not (Operand (Var "a")))
                             (Operand (Var "c"))))) @?= 2,
-         testCase "Constant operand has two forms" $ (countForms (Operand TRUE)) @?= 2
-         -- ,
-         -- testCase "Constant operand has two forms" $ (countForms (Operand (Var "a"))) @?= 3
+         testCase "Constant operand has two forms" $ (countForms (Operand TRUE)) @?= 2,
+         testCase "Single variable has three forms" $ (countForms (Operand (Var "a"))) @?= 3
          ]

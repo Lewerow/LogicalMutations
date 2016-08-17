@@ -13,4 +13,4 @@ countVariables a = size $ countVariablesHelper a where
   countVariablesHelper (BinaryOperator a b c) = (countVariablesHelper b) `union` (countVariablesHelper c)
 
 countForms :: Expression -> Int
-countForms a = 2
+countForms a = 2 + countVariables a
