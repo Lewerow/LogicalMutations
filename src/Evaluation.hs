@@ -16,29 +16,26 @@ simplify expr = case expr of
   BinaryOperator Xor a b -> solveXor a b
   otherwise -> expr
 
+
+
 solveAnd :: Expression -> Expression -> Expression
-solveAnd a b = solveAndHelper First a b
-  where
-  solveAndHelper _ (Operand Truth) a = simplify a
-  solveAndHelper _ a (Operand Truth) = simplify a
-  solveAndHelper _ (UnaryOperator Not (Operand Truth)) _ = UnaryOperator Not (Operand Truth)
-  solveAndHelper _ _ (UnaryOperator Not (Operand Truth)) = UnaryOperator Not (Operand Truth)
-  solveAndHelper n a b
-   | a == b = a
-   | n == First = solveAndHelper Next (simplify a) (simplify b)
-   | otherwise = BinaryOperator And a b
+solveAnd = solveBinary (\a -> simplify a, \_ -> UnaryOperator Not (Operand Truth)) And
 
 solveOr :: Expression -> Expression -> Expression
-solveOr a b = solveOrHelper First a b
+solveOr = solveBinary (\_ -> Operand Truth, \a -> simplify a) Or
+
+type ConstantSolution = Expression -> Expression
+solveBinary :: (ConstantSolution, ConstantSolution) -> BinaryOperatorType -> Expression -> Expression -> Expression
+solveBinary f o a b = solveBinaryHelper First a b
   where
-  solveOrHelper _ (Operand Truth) _ = Operand Truth
-  solveOrHelper _ _ (Operand Truth) = Operand Truth
-  solveOrHelper _ (UnaryOperator Not (Operand Truth)) a = simplify a
-  solveOrHelper _ a (UnaryOperator Not (Operand Truth)) = simplify a
-  solveOrHelper n a b
-   | a == b = a
-   | n == First = solveOrHelper Next (simplify a) (simplify b)
-   | otherwise = BinaryOperator Or a b
+  solveBinaryHelper _ (Operand Truth) a = fst f $ a
+  solveBinaryHelper _ a (Operand Truth) = fst f $ a
+  solveBinaryHelper _ (UnaryOperator Not (Operand Truth)) a = snd f $ a
+  solveBinaryHelper _ a (UnaryOperator Not (Operand Truth)) = snd f $ a
+  solveBinaryHelper n a b
+    | a == b = a
+    | n == First = solveBinaryHelper Next (simplify a) (simplify b)
+    | otherwise = BinaryOperator o a b
 
 solveXor :: Expression -> Expression -> Expression
 solveXor a b = solveXorHelper First a b
