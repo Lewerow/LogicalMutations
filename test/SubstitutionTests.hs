@@ -8,7 +8,7 @@ import Helpers.ExpressionCreators
 import Language
 import Substitution
 
-tests = testGroup "Mutation calculations"
+tests = testGroup "Variable substitutions"
          [
          testCase "Constant expression has no variables" $
            (substitute (Operand Truth) []) @?= (Operand Truth),
