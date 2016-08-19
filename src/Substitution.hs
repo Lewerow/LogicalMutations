@@ -1,0 +1,13 @@
+module Substitution where
+
+import Language
+
+substitute :: Expression -> [(Variable, Expression)] -> Expression
+substitute expr vars = foldl substituteOne expr vars
+
+substituteOne :: Expression -> (Variable, Expression) -> Expression
+substituteOne expr sub = case expr of
+  Operand (Var b) -> if b == fst sub then snd sub else Operand $ Var b
+  UnaryOperator op ex -> UnaryOperator op $ substituteOne ex sub
+  BinaryOperator op ex1 ex2 -> BinaryOperator op (substituteOne ex1 sub) (substituteOne ex2 sub)
+  Operand Truth -> Operand Truth

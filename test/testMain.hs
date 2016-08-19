@@ -8,13 +8,13 @@ import Data.Ord
 
 import qualified NormalizationTests as Norm
 import qualified MutationTests as Mut
-
+import qualified SubstitutionTests as Eval
 
 main = defaultMain tests
 
 
 tests :: TestTree
-tests = testGroup "Language tests" [Norm.tests, Mut.tests]
+tests = testGroup "Language tests" [Norm.tests, Mut.tests, Eval.tests]
 -- tests = testGroup "Tests" [properties, unitTests]
 
 properties :: TestTree

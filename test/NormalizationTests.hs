@@ -3,6 +3,8 @@ module NormalizationTests (tests) where
 import Language
 import Normalization
 
+import Helpers.ExpressionCreators
+
 import Test.Tasty
 import Test.Tasty.HUnit
 
@@ -16,8 +18,8 @@ tests = testGroup "Grammar normalization"
              (normalize (UnaryOperator Not (UnaryOperator Yes (Operand Truth)))) @?=
                  UnaryOperator Not (UnaryOperator Yes (Operand Truth)),
          testCase "Normalization adds unary operator before binary operator" $
-             (normalize (BinaryOperator Xor (Operand (Var "a")) (Operand Truth))) @?=
+             (normalize (BinaryOperator Xor (Operand (var "a")) (Operand Truth))) @?=
                  (UnaryOperator Yes (BinaryOperator Xor
-                     (UnaryOperator Yes(Operand (Var "a")))
+                     (UnaryOperator Yes(Operand (var "a")))
                      (UnaryOperator Yes (Operand Truth))))
          ]
