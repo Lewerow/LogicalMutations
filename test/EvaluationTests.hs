@@ -8,7 +8,7 @@ import Helpers.ExpressionCreators
 import Language
 import Evaluation
 
-tests = testGroup "Expression evaluations" $ [operandTests, unaryTests, andTests, orTests]
+tests = testGroup "Expression evaluations" $ [operandTests, unaryTests, binaryTests, complexTests]
 
 operandTests = testGroup "operand tests"
   [
@@ -25,6 +25,8 @@ unaryTests = testGroup "unary operator tests"
      testCase "Operator No is left by simplification" $
        (evaluate (UnaryOperator Not (Operand Truth)) []) @?= (UnaryOperator Not (Operand Truth))
   ]
+
+binaryTests = testGroup "binary operators" $ [andTests, orTests, xorTests]
 
 andTests = testGroup "and operator tests"
   [
@@ -57,7 +59,6 @@ andTests = testGroup "and operator tests"
 
   ]
 
-
 orTests = testGroup "or operator tests"
   [
      testCase "Or of two truths is simplified to truth" $
@@ -86,4 +87,37 @@ orTests = testGroup "or operator tests"
      testCase "Or of two vars can simplified if only one is known" $
        (evaluate (BinaryOperator Or (Operand (var "a")) (Operand (var "b")))
          [(Variable "a", (UnaryOperator Not (Operand Truth)))]) @?= (Operand (var "b"))
+  ]
+
+xorTests = testGroup "or operator tests"
+  [
+     testCase "Xor of two truths is simplified to not truth" $
+       (evaluate (BinaryOperator Xor (Operand Truth) (Operand Truth)) []) @?= (UnaryOperator Not (Operand Truth)),
+     testCase "Xor of truth and not truth is truth" $
+       (evaluate (BinaryOperator Xor (Operand Truth) (UnaryOperator Not (Operand Truth))) []) @?= (Operand Truth),
+     testCase "Xor of not truth and truth is truth" $
+       (evaluate (BinaryOperator Xor (UnaryOperator Not (Operand Truth)) (Operand Truth)) []) @?= (Operand Truth),
+     testCase "Xor of not truth and not truth is not truth" $
+       (evaluate (BinaryOperator Xor (UnaryOperator Not (Operand Truth)) (UnaryOperator Not (Operand Truth))) []) @?=
+         (UnaryOperator Not (Operand Truth)),
+     testCase "Xor of var and truth cannot be simplified" $
+       (evaluate (BinaryOperator Xor (Operand (var "a")) (Operand Truth)) []) @?=
+         (BinaryOperator Xor (Operand (var "a")) (Operand Truth)),
+     testCase "Xor of two same vars is not truth" $
+       (evaluate (BinaryOperator Xor (Operand (var "a")) (Operand (var "a"))) []) @?= (UnaryOperator Not (Operand Truth)),
+     testCase "Xor of two vars remains or of two vars" $
+       (evaluate (BinaryOperator Xor (Operand (var "a")) (Operand (var "b"))) []) @?=
+         (BinaryOperator Xor (Operand (var "a")) (Operand (var "b"))),
+     testCase "Xor of two vars cannot be computed if only one is known" $
+       (evaluate (BinaryOperator Xor (Operand (var "a")) (Operand (var "b")))
+         [(Variable "a", Operand Truth)]) @?= (BinaryOperator Xor (Operand Truth) (Operand (var "b")))
+  ]
+
+complexTests = testGroup "complex tests"
+  [
+     testCase "And of two vars one evaluating to and other to or" $
+       (evaluate (BinaryOperator And (Operand (var "a")) (Operand (var "b")))
+         [(Variable "a", BinaryOperator And (Operand (var "b")) (Operand Truth)),
+           (Variable "b", BinaryOperator Or (Operand Truth) (Operand (var "c")))]) @?=
+         (Operand Truth)
   ]
