@@ -3,7 +3,10 @@ module Evaluation where
 import Language
 import Substitution
 
-data CallType = First | Next deriving (Eq, Show)
+import Data.List (nub, sort)
+import qualified Data.Map.Strict as M (Map, empty, member, delete, alter, keys, filter)
+
+data RecursionLevel = First | Next deriving (Eq, Show)
 
 evaluate :: Expression -> [(Variable, Expression)] -> Expression
 evaluate expr vars = simplify $ substitute expr vars
@@ -11,38 +14,35 @@ evaluate expr vars = simplify $ substitute expr vars
 simplify :: Expression -> Expression
 simplify expr = case expr of
   UnaryOperator Yes a -> a
-  BinaryOperator And a b -> solveAnd a b
-  BinaryOperator Or a b -> solveOr a b
-  BinaryOperator Xor a b -> solveXor a b
+  NAryOperator And a -> solveAnd a
+  NAryOperator Or a -> solveOr a
+  NAryOperator Xor a -> solveXor a
   otherwise -> expr
 
+solveAnd = solveBinary (Operand Truth, UnaryOperator Not (Operand Truth), And)
+solveOr = solveBinary (UnaryOperator Not (Operand Truth), Operand Truth, Or)
 
-
-solveAnd :: Expression -> Expression -> Expression
-solveAnd = solveBinary (\a -> simplify a, \_ -> UnaryOperator Not (Operand Truth)) And
-
-solveOr :: Expression -> Expression -> Expression
-solveOr = solveBinary (\_ -> Operand Truth, \a -> simplify a) Or
-
-type ConstantSolution = Expression -> Expression
-solveBinary :: (ConstantSolution, ConstantSolution) -> BinaryOperatorType -> Expression -> Expression -> Expression
-solveBinary f o a b = solveBinaryHelper First a b
+solveBinary (defaultValue, terminatingValue, operator) expressions = solveBinaryHelper First leftValues
   where
-  solveBinaryHelper _ (Operand Truth) a = fst f $ a
-  solveBinaryHelper _ a (Operand Truth) = fst f $ a
-  solveBinaryHelper _ (UnaryOperator Not (Operand Truth)) a = snd f $ a
-  solveBinaryHelper _ a (UnaryOperator Not (Operand Truth)) = snd f $ a
-  solveBinaryHelper n a b
-    | a == b = a
-    | n == First = solveBinaryHelper Next (simplify a) (simplify b)
-    | otherwise = BinaryOperator o a b
+    leftValues = filter (/= defaultValue) $ map simplify expressions
+    solveBinaryHelper _ [] = defaultValue
+    solveBinaryHelper _ [a] = a
+    solveBinaryHelper First values = if any (== terminatingValue) values then terminatingValue
+      else solveBinaryHelper Next $ nub values
+    solveBinaryHelper Next values = NAryOperator operator values
 
-solveXor :: Expression -> Expression -> Expression
-solveXor a b = solveXorHelper First a b
+solveXor a = decideOnSingles filtered
   where
-  solveXorHelper n a b
-   | a == b = (UnaryOperator Not (Operand Truth))
-   | a == (UnaryOperator Not (Operand Truth)) && b == (Operand Truth) = Operand Truth
-   | b == (UnaryOperator Not (Operand Truth)) && a == (Operand Truth) = Operand Truth
-   | n == First = solveXorHelper Next (simplify a) (simplify b)
-   | otherwise = BinaryOperator Xor a b
+    simple :: [Expression]
+    simple = map simplify a
+    incrementCount :: Maybe Int -> Maybe Int
+    incrementCount x = Just $ maybe 1 (+1) x
+    expressionCounts :: M.Map Expression Int
+    expressionCounts = foldl (flip (M.alter incrementCount)) M.empty simple
+    simplified = M.filter (\x -> x `mod` 2 == 1) expressionCounts
+    filtered = M.keys $ if M.member (Operand Truth) simplified && M.member (UnaryOperator Not (Operand Truth)) simplified
+      then M.delete (UnaryOperator Not (Operand Truth)) simplified else simplified
+    decideOnSingles [] = UnaryOperator Not (Operand Truth)
+    decideOnSingles [Operand Truth] = Operand Truth
+    decideOnSingles [UnaryOperator Not (Operand Truth)] = Operand Truth
+    decideOnSingles filtered = NAryOperator Xor $ sort filtered

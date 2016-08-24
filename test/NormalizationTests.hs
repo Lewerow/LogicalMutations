@@ -18,8 +18,10 @@ tests = testGroup "Grammar normalization"
              (normalize (UnaryOperator Not (UnaryOperator Yes (Operand Truth)))) @?=
                  UnaryOperator Not (UnaryOperator Yes (Operand Truth)),
          testCase "Normalization adds unary operator before binary operator" $
-             (normalize (BinaryOperator Xor (Operand (var "a")) (Operand Truth))) @?=
-                 (UnaryOperator Yes (BinaryOperator Xor
-                     (UnaryOperator Yes(Operand (var "a")))
-                     (UnaryOperator Yes (Operand Truth))))
+             (normalize (NAryOperator Xor [Operand (var "a"), Operand Truth])) @?=
+                 (UnaryOperator Yes (NAryOperator Xor [
+                     UnaryOperator Yes(Operand (var "a")),
+                     UnaryOperator Yes (Operand Truth)
+                     ])
+                 )
          ]

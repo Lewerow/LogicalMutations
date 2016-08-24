@@ -24,18 +24,18 @@ tests = testGroup "Variable substitutions"
            (substitute (UnaryOperator Not (Operand (var "a"))) [(Variable "a", Operand Truth)]) @?=
             (UnaryOperator Not (Operand Truth)),
          testCase "Single variable is properly substituted in two places" $
-           (substitute (BinaryOperator And (Operand (var "a")) (Operand (var "a"))) [(Variable "a", Operand Truth)]) @?=
-            (BinaryOperator And (Operand Truth) (Operand Truth)),
+           (substitute (NAryOperator And [Operand (var "a"), Operand (var "a")]) [(Variable "a", Operand Truth)]) @?=
+            (NAryOperator And [Operand Truth, Operand Truth]),
          testCase "Multiple variables are properly substituted even with more complex expressions" $
-           (substitute (BinaryOperator And (Operand (var "a")) (Operand (var "b")))
+           (substitute (NAryOperator And [Operand (var "a"), Operand (var "b")])
              [(Variable "a", Operand Truth), (Variable "b", UnaryOperator Not (Operand Truth))]) @?=
-               (BinaryOperator And (Operand Truth) (UnaryOperator Not (Operand Truth))),
+               (NAryOperator And [Operand Truth, UnaryOperator Not (Operand Truth)]),
          testCase "Substitution works one-by-one from the beginning of list" $
-            (substitute (BinaryOperator And (Operand (var "a")) (Operand (var "b")))
+            (substitute (NAryOperator And [Operand (var "a"), Operand (var "b")])
               [(Variable "a", Operand (var "b")), (Variable "b", UnaryOperator Not (Operand Truth))]) @?=
-                (BinaryOperator And (UnaryOperator Not (Operand Truth)) (UnaryOperator Not (Operand Truth))),
+                (NAryOperator And [UnaryOperator Not (Operand Truth), UnaryOperator Not (Operand Truth)]),
          testCase "From the beginning, really. Totally not possible to form recurrence" $
-            (substitute (BinaryOperator And (Operand (var "a")) (Operand (var "b")))
+            (substitute (NAryOperator And [Operand (var "a"), Operand (var "b")])
               [(Variable "a", Operand Truth), (Variable "b", Operand (var "a"))]) @?=
-                (BinaryOperator And (Operand Truth) (Operand (var "a")))
+                (NAryOperator And [Operand Truth, Operand (var "a")])
          ]
