@@ -51,3 +51,12 @@ unitTests = testGroup "Unit tests"
   , testCase "List comparison (same length)" $
       [1, 2, 3] `compare` [1,2,2] @?= LT
   ]
+
+prepend :: a -> [a] -> [a]
+prepend elem list = elem : list
+
+x = testGroup "prepend features" 
+  [
+    QC.testProperty "after prepend list is bigger" $ \list elem -> (length $ prepend elem (list :: [Int])) == length list + 1,
+    QC.testProperty "after prepend becomes first element" $ \list elem -> (head $ prepend elem (list :: [Int])) == elem
+  ]

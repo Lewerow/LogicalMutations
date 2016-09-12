@@ -57,7 +57,16 @@ andTests = testGroup "and operator tests"
          (NAryOperator And [Operand (var "a"), Operand (var "b")]),
      testCase "And of two vars can be sometimes computed if only one is known" $
        (evaluate (NAryOperator And [Operand (var "a"), Operand (var "b")])
-         [(Variable "a", UnaryOperator Not (Operand Truth))]) @?= (UnaryOperator Not (Operand Truth))
+         [(Variable "a", UnaryOperator Not (Operand Truth))]) @?= (UnaryOperator Not (Operand Truth)),
+     testCase "And of var and and of var and truth is this var" $
+       (evaluate (NAryOperator And [Operand (var "a"), NAryOperator And [Operand (var "a"), Operand Truth]]) []) @?=
+         Operand (var "a"),
+     testCase "And of var and and of this var and another one is and of two vars" $
+       (evaluate (NAryOperator And [Operand (var "a"), NAryOperator And [Operand (var "a"), Operand (var "b")]]) []) @?=
+         NAryOperator And [Operand (var "a"), Operand (var "b")],
+     testCase "And of var and and of this var and another one is and of two vars - always ordered" $
+       (evaluate (NAryOperator And [Operand (var "b"), NAryOperator And [Operand (var "b"), Operand (var "a")]]) []) @?=
+         NAryOperator And [Operand (var "a"), Operand (var "b")]
   ]
 
 orTests = testGroup "or operator tests"
