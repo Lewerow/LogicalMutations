@@ -54,6 +54,12 @@ maxMC expr = MC [And, Or, Xor] [Yes, Not] (Truth : (S.toList $ getVariables expr
 noXorMC :: Expression -> MutationConfiguration
 noXorMC expr = MC [And, Or] [Yes, Not] (Truth : (S.toList $ getVariables expr))
 
+onlyMC :: NAryOperatorType -> Expression -> MutationConfiguration
+onlyMC op expr = MC [op] [Yes] (Truth : (S.toList $ getVariables expr))
+
+noVarChangeNoXor :: Expression -> MutationConfiguration
+noVarChangeNoXor _ = MC [And, Or] [Yes, Not] []
+
 class Annotable a where
   availableMutations :: MutationConfiguration -> a -> [a]
 
