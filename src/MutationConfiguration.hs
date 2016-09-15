@@ -11,14 +11,17 @@ data MutationConfiguration = MC {
   operands:: [LogicalType]
 }
 
+getVars :: Expression -> [LogicalType]
+getVars expr = map Var $ S.toList $ getVariables expr
+
 maxMC :: Expression -> MutationConfiguration
-maxMC expr = MC [And, Or, Xor] [Yes, Not] (Truth : (S.toList $ getVariables expr))
+maxMC expr = MC [And, Or, Xor] [Yes, Not] (Truth : (getVars expr))
 
 noXorMC :: Expression -> MutationConfiguration
-noXorMC expr = MC [And, Or] [Yes, Not] (Truth : (S.toList $ getVariables expr))
+noXorMC expr = MC [And, Or] [Yes, Not] (Truth : (getVars expr))
 
 onlyMC :: NAryOperatorType -> Expression -> MutationConfiguration
-onlyMC op expr = MC [op] [Yes] (Truth : (S.toList $ getVariables expr))
+onlyMC op expr = MC [op] [Yes] (Truth : (getVars expr))
 
 noVarChangeNoXor :: Expression -> MutationConfiguration
 noVarChangeNoXor _ = MC [And, Or] [Yes, Not] []
