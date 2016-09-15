@@ -6,7 +6,7 @@ import Mutation
 import MutationConfiguration
 
 import Evaluation
-import Data.Map.Strict as M (singleton, member)
+import Data.Map.Strict as M (singleton, member, size)
 import Data.Set as S (toList)
 import Control.Monad (replicateM)
 import Data.List(foldl')
@@ -39,9 +39,18 @@ executeTests mc expr = foldl' (evaluateMutant originalTreeResults) reportDraft m
         availableValues = replicateM variablesCount [Operand Truth, UnaryOperator Not (Operand Truth)]
         inputSet = map (\p -> zip (fst p) (snd p)) $ zip (repeat variables) availableValues
 
-
-main = pPrint $ executeTests noVarChangeNoXor input
+main = do
+  pPrint $ toMetadata report
+  pPrint report
   where
+    report = executeTests noVarChangeNoXor input
     input = NAryOperator And [
-      Operand Truth
+      NAryOperator Or [
+        UnaryOperator Not (Operand $ Var $ Variable "b"),
+        UnaryOperator Not (Operand $ Var $ Variable "c"),
+        UnaryOperator Not (Operand $ Var $ Variable "a")
+      ],
+        UnaryOperator Not (Operand $ Var $ Variable "a")
       ]
+
+    toMetadata report = MutationMetadata (possibleStructures report) (possibleFunctions report) (M.size $ leftSimplified report)

@@ -15,6 +15,12 @@ data MutationReport = MutationReport {
   leftSimplified :: Map Expression MutationResult
 } deriving Show
 
+data MutationMetadata = MutationMetadata {
+  structureCount :: Int,
+  functionCount :: Int,
+  solutionCount :: Int
+} deriving Show
+
 addTo :: Expression -> MutationReport -> MutationReport
 addTo expr rep = rep {leftSimplified = (adjust addTree expr (leftSimplified rep))}
   where
