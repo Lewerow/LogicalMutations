@@ -11,6 +11,8 @@ import Data.Set as S (toList)
 import Control.Monad (replicateM)
 import Data.List(foldl')
 
+import Text.Show.Pretty
+
 evaluateMutant :: [(Expression, [(Variable, Expression)])] -> MutationReport -> Expression -> MutationReport
 evaluateMutant originalTreeResults accumulatingReport mutatedTree =
     if simplified `M.member` (leftSimplified accumulatingReport) then simplified `addTo` accumulatingReport
@@ -30,7 +32,7 @@ executeTests mc expr = foldl' (evaluateMutant originalTreeResults) reportDraft m
     variables = S.toList $ getVariables expr
     variablesCount = length variables
     tag = simplify expr
-    reportDraft = MutationReport expr totalForms totalFunctions (M.singleton tag (MR 1 []))
+    reportDraft = MutationReport expr totalForms totalFunctions (M.singleton tag (MR (-1) []))
     mutants = generateAllMutants mc expr
     originalTreeResults = map (\v -> (evaluate tag v, v)) inputSet
       where
@@ -38,6 +40,8 @@ executeTests mc expr = foldl' (evaluateMutant originalTreeResults) reportDraft m
         inputSet = map (\p -> zip (fst p) (snd p)) $ zip (repeat variables) availableValues
 
 
-
-
-main = exitSuccess
+main = pPrint $ executeTests noVarChangeNoXor input
+  where
+    input = NAryOperator And [
+      Operand Truth
+      ]

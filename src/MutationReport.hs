@@ -6,14 +6,14 @@ import Data.Map.Strict
 data MutationResult = MR {
   treesCount :: Int,
   exampleDifference :: [(Variable, Expression)]
-}
+} deriving Show
 
 data MutationReport = MutationReport {
   originalTree :: Expression,
   possibleStructures :: Int,
   possibleFunctions :: Int,
   leftSimplified :: Map Expression MutationResult
-}
+} deriving Show
 
 addTo :: Expression -> MutationReport -> MutationReport
 addTo expr rep = rep {leftSimplified = (adjust addTree expr (leftSimplified rep))}

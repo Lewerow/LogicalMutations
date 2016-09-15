@@ -13,7 +13,10 @@ evaluate expr vars = simplify $ substitute expr vars
 
 simplify :: Expression -> Expression
 simplify expr = case expr of
-  UnaryOperator Yes a -> a
+  UnaryOperator Yes a -> simplify a
+  UnaryOperator Not a -> let b = (simplify a) in case b of
+    UnaryOperator Not c -> c
+    otherwise -> UnaryOperator Not b
   NAryOperator And a -> solveAnd a
   NAryOperator Or a -> solveOr a
   NAryOperator Xor a -> solveXor a

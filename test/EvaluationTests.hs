@@ -10,7 +10,22 @@ import Helpers.ExpressionCreators
 import Language
 import Evaluation
 
-tests = testGroup "Expression evaluations" $ [operandTests, unaryTests, binaryTests, complexTests]
+tests = testGroup "Expression evaluations" $ [simplificationTests, operandTests, unaryTests, binaryTests, complexTests]
+
+
+simplificationTests = testGroup "simplification tests"
+  [
+    testCase "And of Truth is Truth" $ simplify (NAryOperator And [Operand Truth]) @?= (Operand Truth),
+    testCase "And of Yes Truth is Truth" $ simplify (NAryOperator And [UnaryOperator Yes (Operand Truth)]) @?= (Operand Truth),
+    testCase "And of Not Truth is Not Truth" $ simplify (NAryOperator And [ UnaryOperator Not (Operand Truth)]) @?=
+      UnaryOperator Not (Operand Truth),
+    testCase "Yes of And of Not Truth is Not Truth" $ simplify (UnaryOperator Yes (NAryOperator And [
+        UnaryOperator Not (Operand Truth)
+      ])) @?= UnaryOperator Not (Operand Truth),
+    testCase "Not And of Not Truth is Truth" $ simplify (UnaryOperator Not (NAryOperator And [
+        UnaryOperator Not (Operand Truth)
+      ])) @?= Operand Truth
+  ]
 
 operandTests = testGroup "operand tests"
   [
