@@ -10,9 +10,10 @@ countForms mc a = countFormsHelper (mc a) $ normalize a
 
 countFormsHelper :: MutationConfiguration -> Expression -> Int
 countFormsHelper mc a = case a of
-  (Operand b) -> length (operands mc)
-  (UnaryOperator b c) -> length (unaries mc) * countFormsHelper mc c
-  (NAryOperator b c) -> length (naries mc) * (foldl (*) 1 $ map (countFormsHelper mc) c)
+  (Operand b) -> bounded $ length (operands mc)
+  (UnaryOperator b c) -> (bounded $ length (unaries mc)) * countFormsHelper mc c
+  (NAryOperator b c) -> (bounded $ length (naries mc)) * (foldl (*) 1 $ map (countFormsHelper mc) c)
+  where bounded = max 1
 
 data MutationPoint = MP Int deriving (Show, Eq, Ord)
 

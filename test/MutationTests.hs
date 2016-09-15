@@ -37,6 +37,8 @@ tests = testGroup "Mutation calculations"
          testCase "Single variable has four forms" $ (countForms maxMC (Operand (var "a"))) @?= 4,
          testCase "Single unary operator with variable has four forms" $
            (countForms maxMC (UnaryOperator Not (Operand (var "a")))) @?= 4,
-         testCase "Binary operator with one variable has fourty-eight forms" $
-           (countForms maxMC (NAryOperator Xor [Operand (var "a"), Operand Truth])) @?= 96
+         testCase "NAry operator with one variable has fourty-eight forms" $
+           (countForms maxMC (NAryOperator Xor [Operand (var "a"), Operand Truth])) @?= 96,
+         testCase "NAry operator with fixed variables and no xor has sixteen forms" $
+           (countForms noVarChangeNoXor (NAryOperator Xor [Operand (var "a"), Operand Truth])) @?= 16
          ]
