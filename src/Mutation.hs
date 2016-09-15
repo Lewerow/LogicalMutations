@@ -1,30 +1,18 @@
 module Mutation where
 
-import qualified Data.Set as S (singleton, empty, union, size, toList, Set)
-
 import Language
 import Normalization
+import MutationConfiguration
+import VariableHelpers
 
-countVariables :: Expression -> Int
-countVariables a = S.size $ getVariables a
+countForms :: (Expression -> MutationConfiguration) -> Expression -> Int
+countForms mc a = countFormsHelper (mc a) $ normalize a
 
-getVariables :: Expression -> S.Set LogicalType
-getVariables (Operand (Var a)) = S.singleton (Var a)
-getVariables (Operand a) = S.empty
-getVariables (UnaryOperator a b) = getVariables b
-getVariables (NAryOperator a b) = foldl S.union S.empty $ map getVariables b
-
-countForms :: Expression -> Int
-countForms a = countFormsHelper $ normalize a
-
-countFormsHelper :: Expression -> Int
-countFormsHelper a = case a of
-  (Operand b) -> operandOptionsCount
-  (UnaryOperator b c) -> unaryOperatorsCount * countFormsHelper c
-  (NAryOperator b c) -> binaryOperatorsCount * (foldl (*) 1 $ map countFormsHelper c)
-  where
-    operandOptionsCount = 1 + countVariables a
-
+countFormsHelper :: MutationConfiguration -> Expression -> Int
+countFormsHelper mc a = case a of
+  (Operand b) -> length (operands mc)
+  (UnaryOperator b c) -> length (unaries mc) * countFormsHelper mc c
+  (NAryOperator b c) -> length (naries mc) * (foldl (*) 1 $ map (countFormsHelper mc) c)
 
 data MutationPoint = MP Int deriving (Show, Eq, Ord)
 
@@ -41,24 +29,6 @@ type OA = Annotation LogicalType
 data AnnotatedExpression = ANAE NAOA [AnnotatedExpression] |
   AUE UOA AnnotatedExpression |
   AO OA
-
-data MutationConfiguration = MC {
-  naries:: [NAryOperatorType],
-  unaries:: [UnaryOperatorType],
-  operands:: [LogicalType]
-}
-
-maxMC :: Expression -> MutationConfiguration
-maxMC expr = MC [And, Or, Xor] [Yes, Not] (Truth : (S.toList $ getVariables expr))
-
-noXorMC :: Expression -> MutationConfiguration
-noXorMC expr = MC [And, Or] [Yes, Not] (Truth : (S.toList $ getVariables expr))
-
-onlyMC :: NAryOperatorType -> Expression -> MutationConfiguration
-onlyMC op expr = MC [op] [Yes] (Truth : (S.toList $ getVariables expr))
-
-noVarChangeNoXor :: Expression -> MutationConfiguration
-noVarChangeNoXor _ = MC [And, Or] [Yes, Not] []
 
 class Annotable a where
   availableMutations :: MutationConfiguration -> a -> [a]

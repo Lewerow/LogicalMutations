@@ -9,6 +9,7 @@ import Helpers.ExpressionCreators
 
 import Language
 import Mutation
+import MutationConfiguration
 
 tests = testGroup "Mutant generation"
      [

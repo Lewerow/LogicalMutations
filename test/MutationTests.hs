@@ -7,6 +7,8 @@ import Helpers.ExpressionCreators
 
 import Language
 import Mutation
+import VariableHelpers
+import MutationConfiguration
 
 tests = testGroup "Mutation calculations"
          [
@@ -31,10 +33,10 @@ tests = testGroup "Mutation calculations"
                ]
              ]
            )) @?= 2,
-         testCase "Constant operand has two forms" $ (countForms (Operand Truth)) @?= 2,
-         testCase "Single variable has four forms" $ (countForms (Operand (var "a"))) @?= 4,
+         testCase "Constant operand has two forms" $ (countForms maxMC (Operand Truth)) @?= 2,
+         testCase "Single variable has four forms" $ (countForms maxMC (Operand (var "a"))) @?= 4,
          testCase "Single unary operator with variable has four forms" $
-           (countForms (UnaryOperator Not (Operand (var "a")))) @?= 4,
+           (countForms maxMC (UnaryOperator Not (Operand (var "a")))) @?= 4,
          testCase "Binary operator with one variable has fourty-eight forms" $
-           (countForms (NAryOperator Xor [Operand (var "a"), Operand Truth])) @?= 48
+           (countForms maxMC (NAryOperator Xor [Operand (var "a"), Operand Truth])) @?= 96
          ]

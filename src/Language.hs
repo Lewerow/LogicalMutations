@@ -9,9 +9,3 @@ data LogicalType = Truth | Var Variable deriving (Show, Eq, Ord) -- no false - i
 data Expression = NAryOperator NAryOperatorType [Expression] |
   UnaryOperator UnaryOperatorType Expression |
   Operand LogicalType deriving (Show, Eq, Ord)
-
-binaryOperatorsCount :: Int
-binaryOperatorsCount = 3
-
-unaryOperatorsCount :: Int
-unaryOperatorsCount = 2
