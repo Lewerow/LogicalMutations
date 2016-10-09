@@ -23,11 +23,12 @@ data NodeInfo = NodeInfo {
   knownEvaluations :: KnownEvaluations
 } deriving (Eq, Ord, Show)
 type Nodes = Map.Map NodeId NodeInfo
+type StructuredExpression = (TreeStructure, Map.Map NodeId NodeInfo)
 
-treeficate :: Expression -> (TreeStructure, Map.Map NodeId NodeInfo)
+treeficate :: Expression -> StructuredExpression
 treeficate expr = snd $ treeficateHelper expr firstNodeId
   where
-  treeficateHelper :: Expression -> NodeId -> (NodeId, (TreeStructure, Nodes))
+  treeficateHelper :: Expression -> NodeId -> (NodeId, StructuredExpression)
   treeficateHelper (Operand t) id = (nextId id,
     (Tree id [], Map.fromList [(id, NodeInfo (TerminalNode t) KE)]))
   treeficateHelper (UnaryOperator t expr) id = (fst treeficated, (Tree id [fst $ snd $ treeficated],
@@ -38,9 +39,9 @@ treeficate expr = snd $ treeficateHelper expr firstNodeId
   treeficateHelper (NAryOperator t exprs) id = (fst nTreefied, (Tree id $ map fst $ reverse $ snd nTreefied,
     foldl' (<>) (Map.fromList [(id, NodeInfo (NAryNode t) KE)]) (map snd $ snd nTreefied)))
       where
-        nTreefied :: (NodeId, [(TreeStructure, Nodes)])
+        nTreefied :: (NodeId, [StructuredExpression])
         nTreefied = naryTreefication exprs $ nextId id
-        naryTreefication :: [Expression] -> NodeId -> (NodeId, [(TreeStructure, Nodes)])
+        naryTreefication :: [Expression] -> NodeId -> (NodeId, [StructuredExpression])
         naryTreefication exprs id = foldl' merger (id, []) exprs
           where
             merger acc expr = (fst treeficated, snd treeficated : snd acc)
