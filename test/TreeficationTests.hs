@@ -11,6 +11,19 @@ import Test.Tasty.HUnit
 
 import qualified Data.Map.Strict as Map
 
+
+complexExpression = NAryOperator And [
+        NAryOperator Xor [
+          NAryOperator Or [Operand Truth, Operand (var "a")],
+          UnaryOperator Not (Operand (var "b")),
+          UnaryOperator Yes (Operand (var "c"))
+        ],
+        NAryOperator And [
+          Operand (var "a"),
+          Operand (var "c")
+        ]
+      ]
+
 tests = testGroup "Treefication"
          [
          testCase "Single operand is treefied to one node" $
@@ -65,5 +78,7 @@ tests = testGroup "Treefication"
                (NodeId 9, NodeInfo (NAryNode And) KE),
                (NodeId 10, NodeInfo (TerminalNode (var "a")) KE),
                (NodeId 11, NodeInfo (TerminalNode (var "c")) KE)
-             ])
+             ]),
+         testCase "Untreefication reverses treefication" $
+             (untreeficate $ treeficate complexExpression) @?= complexExpression
          ]

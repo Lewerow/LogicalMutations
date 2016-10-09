@@ -47,3 +47,14 @@ treeficate expr = snd $ treeficateHelper expr firstNodeId
             merger acc expr = (fst treeficated, snd treeficated : snd acc)
               where
                 treeficated = treeficateHelper expr $ fst acc
+
+untreeficate :: StructuredExpression -> Expression
+untreeficate (tree, nodes) = untree tree
+  where
+    untree (Tree id subtrees) = case nodeType of
+      TerminalNode t -> Operand t
+      UnaryNode t -> UnaryOperator t (untree $ head subtrees)
+      NAryNode t -> NAryOperator t (map untree subtrees)
+      where
+        node = (Map.!) nodes id
+        nodeType = details node
