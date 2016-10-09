@@ -11,13 +11,14 @@ import qualified MutationTests as Mut
 import qualified SubstitutionTests as Subs
 import qualified EvaluationTests as Eval
 import qualified GeneratingMutantsTests as Gen
+import qualified TreeficationTests as Tree
 
 
 main = defaultMain tests
 
 
 tests :: TestTree
-tests = testGroup "Language tests" [Norm.tests, Mut.tests, Subs.tests, Eval.tests, Gen.tests]
+tests = testGroup "Language tests" [Norm.tests, Mut.tests, Subs.tests, Eval.tests, Gen.tests, Tree.tests]
 -- tests = testGroup "Tests" [properties, unitTests]
 
 properties :: TestTree
