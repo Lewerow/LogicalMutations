@@ -80,5 +80,11 @@ tests = testGroup "Treefication"
                (NodeId 11, NodeInfo (TerminalNode (var "c")) KE)
              ]),
          testCase "Untreefication reverses treefication" $
-             (untreeficate $ treeficate complexExpression) @?= complexExpression
+             (untreeficate $ treeficate complexExpression) @?= complexExpression,
+         testCase "Forced untreefication doesn't care about structure" $
+             forcedUntreeficate (treeficate complexExpression) (Map.fromList [(NodeId 0, Operand Truth)])  @?= Operand Truth,
+         testCase "Forced untreefication cares a bit about nodes" $
+             forcedUntreeficate (treeficate complexExpression)
+                 (Map.fromList [(NodeId 1, Operand Truth), (NodeId 9, Operand (var "a"))])  @?=
+                     (NAryOperator And [Operand Truth, Operand (var "a")])
          ]

@@ -3,6 +3,7 @@ module Treefication where
 import Language
 import Data.Monoid ((<>))
 import Data.List (foldl')
+import Data.Maybe (fromMaybe)
 
 import qualified Data.Map.Strict as Map
 
@@ -49,12 +50,17 @@ treeficate expr = snd $ treeficateHelper expr firstNodeId
                 treeficated = treeficateHelper expr $ fst acc
 
 untreeficate :: StructuredExpression -> Expression
-untreeficate (tree, nodes) = untree tree
-  where
-    untree (Tree id subtrees) = case nodeType of
-      TerminalNode t -> Operand t
-      UnaryNode t -> UnaryOperator t (untree $ head subtrees)
-      NAryNode t -> NAryOperator t (map untree subtrees)
+untreeficate tree = forcedUntreeficate tree Map.empty
+
+forcedUntreeficate :: StructuredExpression -> Map.Map NodeId Expression -> Expression
+forcedUntreeficate (tree, nodes) forcedLookupTable = forcedUntree tree
+   where
+     forcedUntree (Tree id subtrees) = fromMaybe defaultValue forcedValue
       where
         node = (Map.!) nodes id
         nodeType = details node
+        forcedValue = Map.lookup id forcedLookupTable
+        defaultValue = (case nodeType of
+             TerminalNode t -> Operand t
+             UnaryNode t -> UnaryOperator t $ forcedUntree $ head subtrees
+             NAryNode t -> NAryOperator t $ map forcedUntree subtrees)
