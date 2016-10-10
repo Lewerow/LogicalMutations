@@ -6,6 +6,7 @@ import Data.List (foldl')
 import Data.Maybe (fromMaybe)
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 
 newtype NodeId = NodeId Int deriving (Eq, Ord, Show)
 
@@ -64,3 +65,13 @@ forcedUntreeficate (tree, nodes) forcedLookupTable = forcedUntree tree
              TerminalNode t -> Operand t
              UnaryNode t -> UnaryOperator t $ forcedUntree $ head subtrees
              NAryNode t -> NAryOperator t $ map forcedUntree subtrees)
+
+generateDependencies :: StructuredExpression -> Map.Map NodeId (Set.Set NodeId)
+generateDependencies (tree, _) = snd $ generateDependenciesHelper tree
+  where
+    generateDependenciesHelper :: TreeStructure -> (Set.Set NodeId, Map.Map NodeId (Set.Set NodeId))
+    generateDependenciesHelper (Tree id subtrees) = (myDeps, depMap)
+      where
+        myDeps = foldl' (\acc childDep -> acc <> fst childDep) (Set.singleton id) childDeps
+        childDeps = map generateDependenciesHelper subtrees
+        depMap = foldl' (\acc childDep -> acc <> snd childDep) (Map.singleton id myDeps) childDeps

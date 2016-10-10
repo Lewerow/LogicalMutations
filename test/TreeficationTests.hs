@@ -10,6 +10,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 
 
 complexExpression = NAryOperator And [
@@ -86,5 +87,25 @@ tests = testGroup "Treefication"
          testCase "Forced untreefication cares a bit about nodes" $
              forcedUntreeficate (treeficate complexExpression)
                  (Map.fromList [(NodeId 1, Operand Truth), (NodeId 9, Operand (var "a"))])  @?=
-                     (NAryOperator And [Operand Truth, Operand (var "a")])
+                     (NAryOperator And [Operand Truth, Operand (var "a")]),
+         testCase "Dependencies are transitive" $
+             (generateDependencies $ treeficate complexExpression) @?= Map.fromList([
+                 (NodeId 0, Set.fromList $ map NodeId [0..11]),
+                 (NodeId 1, Set.fromList $ map NodeId [1..8]),
+                 (NodeId 2, Set.fromList $ map NodeId [2, 3, 4]),
+                 (NodeId 3, Set.singleton $ NodeId 3),
+                 (NodeId 4, Set.singleton $ NodeId 4),
+                 (NodeId 5, Set.fromList $ map NodeId [5, 6]),
+                 (NodeId 6, Set.singleton $ NodeId 6),
+                 (NodeId 7, Set.fromList $ map NodeId [7, 8]),
+                 (NodeId 8, Set.singleton $ NodeId 8),
+                 (NodeId 9, Set.fromList $ map NodeId [9, 10, 11]),
+                 (NodeId 10, Set.singleton $ NodeId 10),
+                 (NodeId 11, Set.singleton $ NodeId 11)
+             ]),
+         testCase "Simple dependencies" $
+             (generateDependencies $ treeficate (UnaryOperator Yes (Operand Truth))) @?= Map.fromList([
+                 (NodeId 0, Set.fromList $ map NodeId [0, 1]),
+                 (NodeId 1, Set.singleton $ NodeId 1)
+             ])
          ]
