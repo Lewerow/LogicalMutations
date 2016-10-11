@@ -125,5 +125,13 @@ tests = testGroup "Treefication"
                  (NodeId 9, NodeId 0),
                  (NodeId 10, NodeId 9),
                  (NodeId 11, NodeId 9)
-             ])
+             ]),
+         testCase "Any node can be extracted as root" $ let (tree, nodes) = treeficate complexExpression in
+             (extractSubtree (tree, nodes) (NodeId 9)) @?=
+               Just (Tree (NodeId 9) [Tree (NodeId 10) [], Tree (NodeId 11) []]),
+         testCase "Any existing can be extracted as root" $ let (tree, nodes) = treeficate complexExpression in
+             (extractSubtree (tree, nodes) (NodeId 4)) @?=
+               Just (Tree (NodeId 4) []),
+         testCase "No element results in Nothing" $ let (tree, nodes) = treeficate complexExpression in
+             (extractSubtree (tree, nodes) (NodeId 19)) @?= Nothing
          ]

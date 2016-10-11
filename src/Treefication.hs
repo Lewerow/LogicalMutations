@@ -3,7 +3,7 @@ module Treefication where
 import Language
 import Data.Monoid ((<>))
 import Data.List (foldl')
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe, listToMaybe)
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -82,3 +82,10 @@ generateDependenciesBottomUp (tree, _) = generateDependenciesHelper tree
   generateDependenciesHelper :: TreeStructure -> Map.Map NodeId NodeId
   generateDependenciesHelper (Tree id subtrees) =
     foldl' (<>) (Map.fromList $ map (\(Tree subId _) -> (subId, id)) subtrees) $ map generateDependenciesHelper subtrees
+
+extractSubtree :: StructuredExpression -> NodeId -> Maybe TreeStructure
+extractSubtree (tree, _) root = extractSubtreeHelper tree root
+  where
+    extractSubtreeHelper (Tree id subtrees) root =
+      if id == root then Just (Tree id subtrees)
+      else listToMaybe $ mapMaybe (\x -> extractSubtreeHelper x root) subtrees
