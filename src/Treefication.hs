@@ -66,8 +66,8 @@ forcedUntreeficate (tree, nodes) forcedLookupTable = forcedUntree tree
              UnaryNode t -> UnaryOperator t $ forcedUntree $ head subtrees
              NAryNode t -> NAryOperator t $ map forcedUntree subtrees)
 
-generateDependencies :: StructuredExpression -> Map.Map NodeId (Set.Set NodeId)
-generateDependencies (tree, _) = snd $ generateDependenciesHelper tree
+generateDependenciesTopDown :: StructuredExpression -> Map.Map NodeId (Set.Set NodeId)
+generateDependenciesTopDown (tree, _) = snd $ generateDependenciesHelper tree
   where
     generateDependenciesHelper :: TreeStructure -> (Set.Set NodeId, Map.Map NodeId (Set.Set NodeId))
     generateDependenciesHelper (Tree id subtrees) = (myDeps, depMap)
@@ -75,3 +75,10 @@ generateDependencies (tree, _) = snd $ generateDependenciesHelper tree
         myDeps = foldl' (\acc childDep -> acc <> fst childDep) (Set.singleton id) childDeps
         childDeps = map generateDependenciesHelper subtrees
         depMap = foldl' (\acc childDep -> acc <> snd childDep) (Map.singleton id myDeps) childDeps
+
+generateDependenciesBottomUp :: StructuredExpression -> Map.Map NodeId NodeId
+generateDependenciesBottomUp (tree, _) = generateDependenciesHelper tree
+  where
+  generateDependenciesHelper :: TreeStructure -> Map.Map NodeId NodeId
+  generateDependenciesHelper (Tree id subtrees) =
+    foldl' (<>) (Map.fromList $ map (\(Tree subId _) -> (subId, id)) subtrees) $ map generateDependenciesHelper subtrees

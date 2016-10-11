@@ -89,7 +89,7 @@ tests = testGroup "Treefication"
                  (Map.fromList [(NodeId 1, Operand Truth), (NodeId 9, Operand (var "a"))])  @?=
                      (NAryOperator And [Operand Truth, Operand (var "a")]),
          testCase "Dependencies are transitive" $
-             (generateDependencies $ treeficate complexExpression) @?= Map.fromList([
+             (generateDependenciesTopDown $ treeficate complexExpression) @?= Map.fromList([
                  (NodeId 0, Set.fromList $ map NodeId [0..11]),
                  (NodeId 1, Set.fromList $ map NodeId [1..8]),
                  (NodeId 2, Set.fromList $ map NodeId [2, 3, 4]),
@@ -104,8 +104,26 @@ tests = testGroup "Treefication"
                  (NodeId 11, Set.singleton $ NodeId 11)
              ]),
          testCase "Simple dependencies" $
-             (generateDependencies $ treeficate (UnaryOperator Yes (Operand Truth))) @?= Map.fromList([
+             (generateDependenciesTopDown $ treeficate (UnaryOperator Yes (Operand Truth))) @?= Map.fromList([
                  (NodeId 0, Set.fromList $ map NodeId [0, 1]),
                  (NodeId 1, Set.singleton $ NodeId 1)
+             ]),
+         testCase "Simple bottom-up dependencies" $
+             (generateDependenciesBottomUp $ treeficate (UnaryOperator Yes (Operand Truth))) @?= Map.fromList([
+                 (NodeId 1, NodeId 0)
+             ]),
+         testCase "Bottom-up dependencies are one-to-one" $
+             (generateDependenciesBottomUp $ treeficate complexExpression) @?= Map.fromList([
+                 (NodeId 1, NodeId 0),
+                 (NodeId 2, NodeId 1),
+                 (NodeId 3, NodeId 2),
+                 (NodeId 4, NodeId 2),
+                 (NodeId 5, NodeId 1),
+                 (NodeId 6, NodeId 5),
+                 (NodeId 7, NodeId 1),
+                 (NodeId 8, NodeId 7),
+                 (NodeId 9, NodeId 0),
+                 (NodeId 10, NodeId 9),
+                 (NodeId 11, NodeId 9)
              ])
          ]

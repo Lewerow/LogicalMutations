@@ -4,6 +4,10 @@ import Language
 import Normalization
 import MutationConfiguration
 import VariableHelpers
+import Treefication
+import MutationReport
+
+import qualified Data.Map.Strict as Map
 
 countForms :: (Expression -> MutationConfiguration) -> Expression -> Int
 countForms mc a = countFormsHelper (mc a) $ normalize a
@@ -69,3 +73,11 @@ generateAllMutants mc expr = generate anno where
 
 allOptions :: Annotation a -> [a]
 allOptions a = (originalValue a) : (availableValues a)
+
+optimizedMutation :: (Expression -> MutationConfiguration) -> Expression -> MutationReport
+optimizedMutation configCreator expr = report
+  where
+    normalForm = normalize expr
+    conf = configCreator normalForm
+    structured = treeficate normalForm
+    report = MutationReport expr 0 0 Map.empty
